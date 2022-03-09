@@ -65,8 +65,6 @@ foreach ($server in $servers)
     if ($WSManTest)
 	{
         Write-Output($server + " test for Remote PowerShell was successful.  Executing Remote Script.")
-		#Invoke-Command -Credential $myPsCred -FilePath $ScriptPath -ComputerName $Server
-        #Invoke-Command -Credential $myPsCred -Cn $server {'powershell.exe -File C:\PowerShell\Script.ps1' }
 		$s = New-PSSession -ComputerName $Server -Credential $myPsCred
 		Invoke-Command -Session $s -Command {C:\PowerShell\Script.ps1}
     }
