@@ -1,4 +1,4 @@
-# Get-RegionAvailability.ps1
+# Get-VMRegionAvailability.ps1
 ## Description
 This PowerShell Script was to take a list of Virtual Machine SKUs and Regions from a CSV and get a list of what Virtual Machine SKUs are supported in the specified Regions.  This script will provide output of the results in both the PowerShell Console as well as a CSV output in the same directory the script is executed from. 
 
