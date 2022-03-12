@@ -1,5 +1,7 @@
-# AzurePS
-A place to share all the Azure PowerShell Scripts I am writing.
+# AzureCode
+A place to share all the Azure Code I am writing. This includes PowerShell, Terraform, ARM, Bicep, Ansible, etc...
+
+## PowerShell
 
 | Script | Description | Link |
 | --------------- | --------------- | --------------- |
