@@ -1,0 +1,21 @@
+{
+    "Subscriptions": [
+        "1df8be2d-eb4d-4adb-a467-91690972635d",
+        "959b5d63-3786-4191-ae93-d834739215d8"
+    ],
+    "VMQuota": {
+        "Regions": [
+            "centralus"
+        ],
+        "Threshold": {
+            "Red": "80%",
+            "Yellow": "50%"
+        }
+    },
+    "Subnet": {
+        "Threshold": {
+            "Red": "80%",
+            "Yellow": "50%"
+        }
+    }
+}
