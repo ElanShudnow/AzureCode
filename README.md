@@ -1,6 +1,8 @@
 # AzureCode
 A place to share all the Azure Code I am writing. This includes PowerShell, Terraform, ARM, Bicep, Ansible, etc...
 
+> **Note**: As this is a relatively new repository, I will be adding new code almost daily for code I have previously written. 
+
 ## PowerShell
 
 | Script | Description |
