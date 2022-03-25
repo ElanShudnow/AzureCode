@@ -3,7 +3,7 @@
 This Terraform Script executed on a Linux Server will deploy a single Windows Virtual Machine using a Marketplace Image.
 
 ## Terraform AzureRM Version Tested
-- \>= 2.26
+- \~> 2.26 (Not tested in the new AzureRM 3.x Provider)
 
 ## Files Involved
 - main.tf

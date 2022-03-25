@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     azurerm = {
@@ -87,6 +86,12 @@ resource "azurerm_network_interface_security_group_association" "nsgassign" {
   network_security_group_id     = azurerm_network_security_group.nsg.id
 }
 
+# Capture Image that Packer Creates
+data "azurerm_image" "packer-image" {
+  name                = "WindowsServer2022-IIS-Packer"
+  resource_group_name = "packer-rg"
+}
+
 # Create a Windows virtual machine
 resource "azurerm_windows_virtual_machine" "vm" {
   name                  = "myTFVM"
@@ -105,12 +110,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     storage_account_type = "Premium_LRS"
   }
 
-  source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = lookup(var.sku, var.location)
-    version   = "latest"
-  }
+  source_image_id = data.azurerm_image.packer-image.id
 
 }
 

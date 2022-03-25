@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     azurerm = {
@@ -11,6 +10,7 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
 
 # Create a resource group
 resource "azurerm_resource_group" "rg" {
@@ -87,14 +87,21 @@ resource "azurerm_network_interface_security_group_association" "nsgassign" {
   network_security_group_id     = azurerm_network_security_group.nsg.id
 }
 
-# Create a Windows virtual machine
-resource "azurerm_windows_virtual_machine" "vm" {
+# Capture Image that Packer Creates
+data "azurerm_image" "packer-image" {
+  name                = "Ubuntu-Packer"
+  resource_group_name = "packer-rg"
+}
+
+# Create a Linux virtual machine
+resource "azurerm_linux_virtual_machine" "vm" {
   name                  = "myTFVM"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   size                  = "Standard_DS1_v2"
   admin_username        = var.admin_username
   admin_password        = var.admin_password
+  disable_password_authentication = false
   network_interface_ids = [
     azurerm_network_interface.nic.id,
   ]
@@ -105,19 +112,14 @@ resource "azurerm_windows_virtual_machine" "vm" {
     storage_account_type = "Premium_LRS"
   }
 
-  source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = lookup(var.sku, var.location)
-    version   = "latest"
-  }
-
+  source_image_id = data.azurerm_image.packer-image.id
+  
 }
 
 data "azurerm_public_ip" "ip" {
   name                = azurerm_public_ip.publicip.name
-  resource_group_name = azurerm_windows_virtual_machine.vm.resource_group_name
-  depends_on          = [azurerm_windows_virtual_machine.vm]
+  resource_group_name = azurerm_linux_virtual_machine.vm.resource_group_name
+  depends_on          = [azurerm_linux_virtual_machine.vm]
 }
 
 

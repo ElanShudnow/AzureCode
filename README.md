@@ -17,6 +17,8 @@ A place to share all the Azure Code I am writing. This includes PowerShell, Terr
 | --------------- | --------------- |
 | [Windows_VM_Marketplace](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/windows_vm_marketplace) | This Terraform Script executed on a Linux Server will deploy a single Windows Virtual Machine using a Marketplace Image. |
 | [Linux_VM_Marketplace](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/linux_vm_marketplace) | This Terraform Script executed on a Linux Server will deploy a single Ubuntu Virtual Machine using a Marketplace Image. |
+| [Windows_VM_ManagedImage](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/windows_vm_managedimage) | This Terraform Script executed on a Linux Server will deploy a single Windows Virtual Machine using a Managed Image. |
+| [Linux_VM_ManagedImage](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/linux_vm_managedimage) | This Terraform Script executed on a Linux Server will deploy a single Ubuntu Virtual Machine using a Managed Image. |
 
 ## Packer
 
