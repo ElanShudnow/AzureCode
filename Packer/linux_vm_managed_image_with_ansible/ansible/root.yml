@@ -1,0 +1,6 @@
+---
+- name: Execute Ansible Playbooks
+  hosts: default
+
+  roles:
+    - git

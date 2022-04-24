@@ -1,15 +1,16 @@
-# Linux VM Managed Image
+# Linux VM Managed Image with Ansible
 ## Description
-Leverage a Packer Script executed on a Linux Server to deploy a Generalized Linux (Ubuntu) Managed Image for future VM deployments leveraging Terraform or manual procedures. Packer will configured the Managed Image to have Nginx installed.
+Leverage a Packer Script executed on a Linux Server to deploy a Generalized Linux (Ubuntu) Managed Image for future VM deployments leveraging Terraform or manual procedures. Packer will configured the Managed Image to have Nginx installed as well as leverage the Ansible Provisioner to install Ansible Roles defined within the ansible directory.
 
 ## Packer AzureRM Version Tested
 - 1.9
 
-## Files Involved
+## Files/Directories Involved
 - ubuntu.pkr.hcl
+- ansible
 
 ## Instructions
-1. Download ubuntu.pkr.hcl
+1. Download ubuntu.pkr.hcl and the ansible directory and its contents
 
 2. Open ubuntu.pkr.hcl and modify variables according to your needs. The following variables exist with a description:
 
@@ -56,11 +57,51 @@ Leverage a Packer Script executed on a Linux Server to deploy a Generalized Linu
 
     ![Alt text](./DemoScreenshots/demo3.jpg?raw=true)
 
-7. When Packer completes, you will see one of the last steps it does after creating the Managed Image is to clean up the VM resources. 
+7. As the code runs, you will notice in the output that Ansible begins execution and installs any roles that are defined.
 
     ![Alt text](./DemoScreenshots/demo4.jpg?raw=true)
 
-
-8. In the Resource Group you specified in the azure-resource-group variable within your Packer script, you will now see your Managed Image.  You can now deploy new VMs from your Managed Image or leverage Terraform to deploy VMs leveraging the Managed Image.
+8. When Packer completes, you will see one of the last steps it does after creating the Managed Image is to clean up the VM resources. 
 
     ![Alt text](./DemoScreenshots/demo5.jpg?raw=true)
+
+
+9.  In the Resource Group you specified in the azure-resource-group variable within your Packer script, you will now see your Managed Image.  You can now deploy new VMs from your Managed Image or leverage Terraform to deploy VMs leveraging the Managed Image.
+
+    ![Alt text](./DemoScreenshots/demo6.jpg?raw=true)
+
+## Ansible Configuration
+In most public documentation, it shows how to execute a single Ansible Playbook using Packer.  However, the solution I provide allows you to run multiple roles.  You define a root.yml playbook which executes as many roles (playbooks within the roles) as you have defined within the root.yml file.  We do need to specify the path to which the roles are created.
+
+  ```Bash
+  provisioner "ansible" {
+    extra_arguments = ["--become"]
+    playbook_file   = "./ansible/root.yml"
+    roles_path      = "./ansible/roles"
+  }
+  ```
+
+Taking a good at the root.yml file: if you have multiple Ansible Roles you want to execute, you will simply add additional roles to the root.yml.
+
+  ```Bash
+    ---
+    - name: Execute Ansible Playbooks
+    hosts: default
+
+    roles:
+        - git
+  ```
+
+Then within the path you've specified in roles_path which is ./ansible/roles, we would add a new folder for each of our Ansible Roles.  For example, our git role we see above, there is a folder under our ansible directory called roles, with the git directory under it, and a tasks folder under that which includes our playbook to install git.
+
+![Alt text](./DemoScreenshots/demo7.jpg?raw=true)
+
+Our code to install git within our main.yml role file is simple:
+
+  ```Bash
+    ---
+    - name: Install Git package
+    apt: 
+        name=git
+        state=present
+  ```

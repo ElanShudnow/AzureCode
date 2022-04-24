@@ -1,11 +1,11 @@
 variable "azure-region" {
   type    = string
-  default = "northcentralus"
+  default = "westus2"
 }
 
 variable "azure-resource-group" {
   type    = string
-  default = "packer-rg"
+  default = "packer"
 }
 
 variable "azure-vm-size" {
@@ -57,6 +57,20 @@ build {
     inline          = [
       "apt-get update",
       "apt-get install nginx -y"
+      ]
+    inline_shebang  = "/bin/sh -x"
+  }
+
+  provisioner "ansible" {
+    extra_arguments = ["--become"]
+    playbook_file   = "./ansible/root.yml"
+    roles_path      = "./ansible/roles"
+  }
+
+  provisioner "shell" {
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
+    inline          = [
+      "apt-get update",
       "apt-get upgrade -y",
       "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
       ]
