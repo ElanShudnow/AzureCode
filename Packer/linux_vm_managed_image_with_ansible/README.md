@@ -5,6 +5,11 @@ Leverage a Packer Script executed on a Linux Server to deploy a Generalized Linu
 ## Packer AzureRM Version Tested
 - 1.9
 
+## Ansible Version Tested (Installed on the same host as Packer)
+- ansible [core 2.12.4]
+- python version = 3.8.10 (default, Mar 15 2022, 12:22:08) [GCC 9.4.0]
+- jinja version = 2.10.1
+
 ## Files/Directories Involved
 - ubuntu.pkr.hcl
 - ansible
