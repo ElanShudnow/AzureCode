@@ -1,5 +1,7 @@
 # AzureCode
-A place to share all the Azure Code I am writing. This includes PowerShell, Terraform, ARM, Bicep, Ansible, etc...
+A place to share all the Azure Code I am writing. This includes PowerShell, Terraform, ARM, Bicep, Ansible, etc...  
+
+For additional Azure content, visit my blog: [https://www.shudnow.io](https://www.shudnow.io)
 
 ## PowerShell
 
