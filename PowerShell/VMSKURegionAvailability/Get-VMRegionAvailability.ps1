@@ -48,10 +48,24 @@ foreach ($Region in $Regions)
         $exportObj = New-Object PSObject
         if ($RegionData.Name -contains $VMSku.Name)
         {
-            Write-Host "$($VMSku.Name) Available in $Region" -ForegroundColor Green
+            $Zones = $($RegionData | Where-Object {$_.Name -eq 'Standard_A1_v2'}).LocationInfo.Zones
+            $SortedZones = $Zones -join ","
+            if ($Zones -ne $null)
+            {
+                Write-Host "$($VMSku.Name) Available in $Region in the following Zones: $SortedZones" -ForegroundColor Green
+            }
+            else 
+            {
+                Write-Host "$($VMSku.Name) Available in $Region with no Zonal support." -ForegroundColor Green
+            }
+                
             $exportObj | Add-Member NoteProperty -Name "Region" -Value $Region
             $exportObj | Add-Member NoteProperty -Name "SKU" -Value $VMSku.Name
             $exportObj | Add-Member NoteProperty -Name "Available" -Value 'Yes'
+            $exportObj | Add-Member NoteProperty -Name "Zones" -Value $SortedZones
+
+            $Zones = $null
+            $SortedZones = $null
         }
         else 
         {

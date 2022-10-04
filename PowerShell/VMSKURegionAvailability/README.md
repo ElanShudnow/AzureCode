@@ -36,7 +36,7 @@ This PowerShell Script takes a list of Virtual Machine SKUs from a CSV and Regio
 
 7. The results are provided in the PowerShell Console. 
 
-    ![Alt text](./DemoScreenshots/demo5.jpg?raw=true)
+    ![Alt text](./DemoScreenshots/demo6.jpg?raw=true)
 
 8. An output CSV is also generated and stored in the same folder the script was executed from. The location is specified at the bottom of the PowerShell Console. 
    
