@@ -20,9 +20,9 @@
 [CmdletBinding()]
 Param
 (
-    [Parameter(Mandatory=$true)]
-    [string]
-    $Region 
+  [Parameter(Mandatory = $true)]
+  [string]
+  $Region 
 )
 
 # Check Current Directory
@@ -33,37 +33,58 @@ $ExportFile = $scriptFolder + '\' + 'output.csv'
 $SubscriptionIDs = (Get-AzSubscription | Out-GridView -Title 'Azure Subscription Selection' -PassThru).subscriptionId
 
 $AvailabilityPeerReport = @()
-foreach ($SubscriptionId in $SubscriptionIDs)
-{
+foreach ($SubscriptionId in $SubscriptionIDs) {
   $Body = @{
-    location = $Region
+    location        = $Region
     subscriptionIds = @("subscriptions/$SubscriptionId)")
   }
   
   $json = $Body | ConvertTo-Json
 
   $SubscriptionName = (Get-AzSubscription -SubscriptionID $SubscriptionId).Name
-  Write-Host "`nObtaining Availability Zone Logical to Physical Zone Mapping for $SubscriptionName in the $Region Region." -ForegroundColor Green
-  
+
   $AvailablityZoneMapping = Invoke-AzRestMethod -Path "/subscriptions/$SubscriptionId/providers/Microsoft.Resources/checkZonePeers/?api-version=2020-01-01" -Method POST -Payload $json
   $AvailablityZoneMappingContent = $AvailablityZoneMapping.Content
-  $AvailablityZoneMappingConvertedContent = $AvailablityZoneMappingContent | ConvertFrom-Json
-  
-  $AvailabilityZonePeers = $AvailablityZoneMappingConvertedContent.availabilityZonePeers
+  $AvailablityZoneMappingStatusCode = $AvailablityZoneMapping.StatusCode
 
-  foreach ($AvailabilityZonePeer in $AvailabilityZonePeers)
+  Write-Host "`nObtaining Availability Zone Logical to Physical Zone Mapping for $SubscriptionName in the $Region Region." -ForegroundColor Yellow
+  if ($AvailablityZoneMappingStatusCode -eq 200) 
   {
-    $AvailabilityPeerObject = New-Object PSObject
-    $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionId -Value $SubscriptionId
-    $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
-    $AvailabilityPeerObject | Add-Member -type NoteProperty -name PhysicalZone -Value $AvailabilityZonePeer.availabilityZone
-    $AvailabilityPeerObject | Add-Member -type NoteProperty -name LogicalZone -Value $AvailabilityZonePeer.peers.availabilityZone
-    $AvailabilityPeerObject | Add-Member -type NoteProperty -name Region -Value $Region
-    $AvailabilityPeerReport += $AvailabilityPeerObject
+    Write-Host "`n    - Success: Successful lookup for the $SubscriptionName Subscription." -ForegroundColor Green
+
+    $AvailablityZoneMappingConvertedContent = $AvailablityZoneMappingContent | ConvertFrom-Json
+    $AvailabilityZonePeers = $AvailablityZoneMappingConvertedContent.availabilityZonePeers
+  
+    foreach ($AvailabilityZonePeer in $AvailabilityZonePeers) 
+    {
+      $AvailabilityPeerObject = New-Object PSObject
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionId -Value $SubscriptionId
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name PhysicalZone -Value $AvailabilityZonePeer.availabilityZone
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name LogicalZone -Value $AvailabilityZonePeer.peers.availabilityZone
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name Region -Value $Region
+      $AvailabilityPeerReport += $AvailabilityPeerObject
+    }
+  }
+  elseif (($AvailablityZoneMappingStatusCode -eq 404) -and ($AvailablityZoneMappingContent -like "*The resource type could not be found in the namespace 'Microsoft.Resources'*")) 
+  {
+    Write-Host "`n    - ERROR: checkZonePeers is not registered for this subscription. See README." -ForegroundColor Red
+  }
+  else
+  {
+    Write-Host "`n    - ERROR: Unknown Error: $AvailablityZoneMappingContent." -ForegroundColor Red
   }
 }
 
-$AvailabilityPeerReport | Export-Csv -Path $ExportFile -NoTypeInformation
-Write-Host "`nOutput CSV generated at the following location: $ExportFile" -ForegroundColor Yellow
+if ($AvailabilityPeerReport -ne $null)
+{
+  $AvailabilityPeerReport | Export-Csv -Path $ExportFile -NoTypeInformation
+  Write-Host "`nOutput CSV generated at the following location: $ExportFile" -ForegroundColor Yellow
+}
+else 
+{
+  Write-Host "`nNo Output CSV generated as no Subscriptions had a successful lookup." -ForegroundColor Yellow
+}
+
 
 

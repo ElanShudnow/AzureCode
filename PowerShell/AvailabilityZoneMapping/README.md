@@ -11,7 +11,7 @@ This PowerShell Script takes a list of Azure Subscriptions you have selected in 
 - output.csv (created after script execution)
 
 ## Resource Provider Requirements
-This checkZonePeers API required a Resource Provider Registration.  To register and verify the resource provider registration, leverage the following commands in Azure CLI:
+This checkZonePeers API required a Resource Provider Registration for each subscription you select.  To register and verify the resource provider registration, leverage the following commands in Azure CLI:
 - To register: az feature register -n AvailabilityZonePeering --namespace Microsoft.Resources
 - To view register status: az feature show -n AvailabilityZonePeering --namespace Microsoft.Resources
 
@@ -37,3 +37,13 @@ This checkZonePeers API required a Resource Provider Registration.  To register 
 6. In the output CSV that is generated, you will see details around the Subscriptions and Physical to Logical Availability Zone Mapping. 
    
    ![Alt text](./DemoScreenshots/demo5.jpg?raw=true)
+
+
+## Error Checking
+As mentioned in the Resource Provider Requirementions section, each subscription requires the AvailabilityZonePeering to be registered within the Microsoft.Resources Provider.  The script will check for the existence of this in each subscription and skip if not registered.  
+
+Example #1 - if I select two subscriptions that do not have this registered:
+    ![Alt text](./DemoScreenshots/demo6.jpg?raw=true)
+
+Example #2 - if I select two subscriptions, one that this registered and one that does not:
+    ![Alt text](./DemoScreenshots/demo7.jpg?raw=true)
