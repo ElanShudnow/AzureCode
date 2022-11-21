@@ -6,7 +6,7 @@ This script creates an HTML Report on Public IP Information across a single or a
 - Windows PowerShell 5.1
 - PowerShell 7.2.7
 
-# AZ PowerShell Module Version Tested
+## AZ PowerShell Module Version Tested
 - [9.1.1](https://github.com/Azure/azure-powershell/releases)
 
 ## Files Involved
