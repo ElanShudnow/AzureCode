@@ -65,6 +65,91 @@ If(!(test-path -PathType container $OutputFolderPath))
     New-Item -ItemType Directory -Path $OutputFolderPath | Out-Null
 }
 
+Function Set-CellColor
+{ 
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory,Position=0)]
+        [string]$Property,
+        [Parameter(Mandatory,Position=1)]
+        [string]$Color,
+        [Parameter(Mandatory,ValueFromPipeline)]
+        [Object[]]$InputObject,
+        [Parameter(Mandatory)]
+        [string]$Filter,
+        [switch]$Row
+    )
+    
+    Begin {
+        Write-Verbose "$(Get-Date): Function Set-CellColor begins"
+        If ($Filter)
+        {   If ($Filter.ToUpper().IndexOf($Property.ToUpper()) -ge 0)
+            {   $Filter = $Filter.ToUpper().Replace($Property.ToUpper(),"`$Value")
+                Try {
+                    [scriptblock]$Filter = [scriptblock]::Create($Filter)
+                }
+                Catch {
+                    Write-Warning "$(Get-Date): ""$Filter"" caused an error, stopping script!"
+                    Write-Warning $Error[0]
+                    Exit
+                }
+            }
+            Else
+            {   Write-Warning "Could not locate $Property in the Filter, which is required.  Filter: $Filter"
+                Exit
+            }
+        }
+    }
+    
+    Process {
+        ForEach ($Line in $InputObject)
+        {   If ($Line.IndexOf("<tr><th") -ge 0)
+            {   Write-Verbose "$(Get-Date): Processing headers..."
+                $Search = $Line | Select-String -Pattern '<th ?[a-z\-:;"=]*>(.*?)<\/th>' -AllMatches
+                $Index = 0
+                ForEach ($Match in $Search.Matches)
+                {   If ($Match.Groups[1].Value -eq $Property)
+                    {   Break
+                    }
+                    $Index ++
+                }
+                If ($Index -eq $Search.Matches.Count)
+                {   Write-Warning "$(Get-Date): Unable to locate property: $Property in table header"
+                    Exit
+                }
+                Write-Verbose "$(Get-Date): $Property column found at index: $Index"
+            }
+            If ($Line -match "<tr( style=""background-color:.+?"")?><td")
+            {   $Search = $Line | Select-String -Pattern '<td ?[a-z\-:;"=]*>(.*?)<\/td>' -AllMatches
+                $Value = $Search.Matches[$Index].Groups[1].Value -as [double]
+                If (-not $Value)
+                {   $Value = $Search.Matches[$Index].Groups[1].Value
+                }
+                If (Invoke-Command $Filter)
+                {   If ($Row)
+                    {   Write-Verbose "$(Get-Date): Criteria met!  Changing row to $Color..."
+                        If ($Line -match "<tr style=""background-color:(.+?)"">")
+                        {   $Line = $Line -replace "<tr style=""background-color:$($Matches[1])","<tr style=""background-color:$Color"
+                        }
+                        Else
+                        {   $Line = $Line.Replace("<tr>","<tr style=""background-color:$Color"">")
+                        }
+                    }
+                    Else
+                    {   Write-Verbose "$(Get-Date): Criteria met!  Changing cell to $Color..."
+                        $Line = $Line.Replace($Search.Matches[$Index].Value,"<td style=""background-color:$Color"">$Value</td>")
+                    }
+                }
+            }
+            Write-Output $Line
+        }
+    }
+    
+    End {
+        Write-Verbose "$(Get-Date): Function Set-CellColor completed"
+    }
+}
+
 Function Get-AZPublicIPInformation
 {
 $Body = @"
@@ -84,6 +169,7 @@ $Body = @"
         $PublicIPRegion = $AZPublicIP.Location
         $PublicIPSKU = $AZPublicIP.Sku.Name
         $PublicIPDDOSEnabled = $AZPublicIP.DdosSettings.ProtectionMode
+        $IPConfiguration = $AZPublicIP.IpConfiguration.Id
 
         if ($PublicIPDDOSEnabled -eq 'Enabled')
         {   
@@ -95,6 +181,7 @@ $Body = @"
             $PublicIPReport | Add-Member -type NoteProperty -name Region -Value $PublicIPRegion
             $PublicIPReport | Add-Member -type NoteProperty -name SKU -Value $PublicIPSKU
             $PublicIPReport | Add-Member -type NoteProperty -name 'DDOS Protection' -Value $PublicIPDDOSEnabled
+            $PublicIPReport | Add-Member -type NoteProperty -name 'Assignment' -Value $(if ($IPConfiguration) {$IPConfiguration} else { 'Orphaned'})
 
             $CustomPublicIPReport += $PublicIPReport
         }
@@ -108,6 +195,7 @@ $Body = @"
             $PublicIPReport | Add-Member -type NoteProperty -name Region -Value $PublicIPRegion
             $PublicIPReport | Add-Member -type NoteProperty -name SKU -Value $PublicIPSKU
             $PublicIPReport | Add-Member -type NoteProperty -name 'DDOS Protection' -Value $null
+            $PublicIPReport | Add-Member -type NoteProperty -name 'Assignment' -Value $(if ($IPConfiguration) {$IPConfiguration} else { 'Orphaned'})
     
             $CustomPublicIPReport += $PublicIPReport        
         }
@@ -115,6 +203,7 @@ $Body = @"
     }
 
      $CustomPublicIPReportHTML = $CustomPublicIPReport | Convertto-HTML
+     $CustomPublicIPReportHTML = $CustomPublicIPReportHTML | Set-CellColor Assignment red -Filter "Assignment -eq 'Orphaned'"
 
     if (-not($PublicIPName)) 
     { 

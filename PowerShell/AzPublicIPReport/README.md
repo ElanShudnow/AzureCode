@@ -32,12 +32,23 @@ This script creates an HTML Report on Public IP Information across a single or a
 
     ![Alt text](./DemoScreenshots/demo3.jpg?raw=true)
 
-   Verify the information reported.
+   Verify the information reported. As you will see, the report will include the following pieces of information about the Public IP Resource, such as:
+
+    * Name
+    * Address
+    * Version
+    * Resource Group
+    * Region
+    * SKU
+    * DDOS Protection
+    * Assignment - what resource the Public IP Resource is assigned to.  If none, the cell will be colored Red with the text, Orphaned. 
+  
+    <br/>
 
     ![Alt text](./DemoScreenshots/demo4.jpg?raw=true)
 
 
-3. To create a separate HTML Outputs for each Azure Subscription, leverage -SingleHTMLOutput $false.  
+1. To create a separate HTML Outputs for each Azure Subscription, leverage -SingleHTMLOutput $false.  
 
      The command we execute will be:
     ```PowerShell
