@@ -163,7 +163,7 @@ ForEach ($Subscription in $AzSubscriptions)
     }
 }
 
-# Export HTML Report
+# Export CSV Report
 $AZAdvisorReportFileName = "AzCostAdvisor.csv"
 $AZAdvisorReportFilePath = $OutputFolderPath + '\' + $AZAdvisorReportFileName
 $CustomAzAdvisorReport | Export-CSV -Path $AZAdvisorReportFilePath -NoTypeInformation
