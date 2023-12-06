@@ -17,6 +17,7 @@ For additional Azure content, visit my blog: [https://www.shudnow.io](https://ww
 | [AzPublicIPReport](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzPublicIPReport) | This script creates an HTML Report on what Public IP Addresses exist across a single or all subscriptions.  This will also include information on the recently announced Public IP DDOS Protection feature. |
 | [AzCostAdvisorMGScope](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzCostAdvisorMGScope) | This script creates a report for Azure Advisor Cost Recommendations at the Management Group Scope in a recursive or non-recursive manner. |
 | [AzVNETOverlap](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzVNETOverlap) | This script creates will output any VNET that overlaps with another VNET within all Azure Subscriptions or specified Azure Subscriptions. |
+| [AzResourceMoveSupport](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzResourceMoveSupport) | This script will take an Azure Usage Report csv file and provide new columns as to whether each resource supports migration to another Resource Group, to another Subscription, or to another Region. |
 
 ## Terraform
 
@@ -25,7 +26,7 @@ For additional Azure content, visit my blog: [https://www.shudnow.io](https://ww
 | [Windows_VM_Marketplace](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/windows_vm_marketplace) | This Terraform Script executed on a Linux Server will deploy a single Windows Virtual Machine using a Marketplace Image. |
 | [Linux_VM_Marketplace](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/linux_vm_marketplace) | This Terraform Script executed on a Linux Server will deploy a single Ubuntu Virtual Machine using a Marketplace Image. |
 | [Windows_VM_ManagedImage](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/windows_vm_managedimage) | This Terraform Script executed on a Linux Server will deploy a single Windows Virtual Machine using a Managed Image. |
-| [Linux_VM_ManagedImage](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/linux_vm_managedimage) | This script creates an HTML Report on Subnet Availability across a single or all subscriptions.  This will help in the decision making process if VNET sizes need to be increased and potentially additional subnets need to be created. |
+| [Linux_VM_ManagedImage](https://github.com/ElanShudnow/AzurePS/tree/main/Terraform/linux_vm_managedimage) | This Terraform Script executed on a Linux Server will deploy a single Linux Virtual Machine using a Managed Image. |
 
 ## Packer
 
