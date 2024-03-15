@@ -127,7 +127,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "Perf\r\n| where CounterName == \"% Free Space\" and InstanceName != \"_Total\" and InstanceName !contains \"HarddiskVolume\"\r\n| summarize arg_max(TimeGenerated, *) by Computer, InstanceName\r\n| extend FreeSpacePercentage = CounterValue\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, InstanceName, toint(FreeSpacePercentage)\r\n| sort by FreeSpacePercentage asc",
+              "query": "Perf\r\n| where CounterName == \"% Free Space\" and InstanceName != \"_Total\" and InstanceName !contains \"HarddiskVolume\"\r\n| summarize arg_max(TimeGenerated, *) by Computer, InstanceName\r\n| extend FreeSpacePercentage = CounterValue\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Volume=InstanceName, toint(FreeSpacePercentage)\r\n| sort by FreeSpacePercentage asc",
               "size": 0,
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
@@ -213,7 +213,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": " InsightsMetrics\r\n| where Namespace == \"LogicalDisk\"\r\n| extend Tags = todynamic(Tags)\r\n| extend Drive = tostring(Tags[\"vm.azm.ms/mountId\"])\r\n| extend volumeSizeGB = Tags[\"vm.azm.ms/diskSizeMB\"]/1024.0\r\n| summarize \r\n     FreeSpacePercentage = round(avgif(Val, Name == 'FreeSpacePercentage'))\r\n    ,FreeSpaceGB = round(avgif(Val, Name == 'FreeSpaceMB') /1024)\r\n    ,take_any(round(volumeSizeGB))\r\n    by _ResourceId, Drive\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Drive, FreeSpacePercentage,FreeSpaceGB,volumeSizeGB\r\n\r\n",
+              "query": " InsightsMetrics\r\n| where Namespace == \"LogicalDisk\"\r\n| extend Tags = todynamic(Tags)\r\n| extend Drive = tostring(Tags[\"vm.azm.ms/mountId\"])\r\n| extend volumeSizeGB = Tags[\"vm.azm.ms/diskSizeMB\"]/1024.0\r\n| summarize \r\n     FreeSpacePercentage = round(avgif(Val, Name == 'FreeSpacePercentage'))\r\n    ,FreeSpaceGB = round(avgif(Val, Name == 'FreeSpaceMB') /1024)\r\n    ,take_any(round(volumeSizeGB))\r\n    by _ResourceId, Drive\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Volume=Drive, FreeSpacePercentage,FreeSpaceGB,volumeSizeGB\r\n\r\n",
               "size": 0,
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
@@ -294,7 +294,7 @@
     }
   ],
   "fallbackResourceIds": [
-    "Azure Monitor"
+    "azure monitor"
   ],
   "fromTemplateId": "community-Workbooks/Storage/Overview",
   "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
