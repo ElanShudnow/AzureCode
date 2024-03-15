@@ -84,7 +84,8 @@
               "additionalResourceOptions": [],
               "showDefault": false
             },
-            "jsonData": "[\n    { \"value\":\"InsightMetrics\", \"label\":\"VM Insights\" },\n    { \"value\":\"Perf\", \"label\":\"Performance Counters\", \"selected\":true  }\n]"
+            "jsonData": "[\n    { \"value\":\"InsightMetrics\", \"label\":\"VM Insights\" },\n    { \"value\":\"Perf\", \"label\":\"Performance Counters\", \"selected\":true  }\n]",
+            "value": "InsightMetrics"
           },
           {
             "id": "51119dec-ba10-4d0d-a3a1-6053b15affab",
@@ -213,7 +214,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": " InsightsMetrics\r\n| where Namespace == \"LogicalDisk\"\r\n| extend Tags = todynamic(Tags)\r\n| extend Drive = tostring(Tags[\"vm.azm.ms/mountId\"])\r\n| extend volumeSizeGB = Tags[\"vm.azm.ms/diskSizeMB\"]/1024.0\r\n| summarize \r\n     FreeSpacePercentage = round(avgif(Val, Name == 'FreeSpacePercentage'))\r\n    ,FreeSpaceGB = round(avgif(Val, Name == 'FreeSpaceMB') /1024)\r\n    ,take_any(round(volumeSizeGB))\r\n    by _ResourceId, Drive\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Volume=Drive, FreeSpacePercentage,FreeSpaceGB,volumeSizeGB\r\n\r\n",
+              "query": " InsightsMetrics\r\n| where Namespace == \"LogicalDisk\"\r\n| extend Tags = todynamic(Tags)\r\n| extend Drive = tostring(Tags[\"vm.azm.ms/mountId\"])\r\n| extend volumeSizeGB = Tags[\"vm.azm.ms/diskSizeMB\"]/1024.0\r\n| summarize \r\n     FreeSpacePercentage = round(avgif(Val, Name == 'FreeSpacePercentage'))\r\n    ,FreeSpaceGB = round(avgif(Val, Name == 'FreeSpaceMB') /1024, 2)\r\n    ,take_any(round(volumeSizeGB, 2))\r\n    by _ResourceId, Drive\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Volume=Drive, FreeSpacePercentage,FreeSpaceGB,volumeSizeGB\r\n\r\n",
               "size": 0,
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
