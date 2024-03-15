@@ -1,0 +1,301 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "parameters": [
+          {
+            "id": "1ca69445-60fc-4806-b43d-ac7e6aad630a",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "description": "Subscriptions that contain Azure Virtual Machines and/or ARC-Enabled Servers",
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "where type =~ 'microsoft.compute/virtualmachines' or type =~ 'microsoft.hybridcompute/machines'\r\n\t| summarize Count = count() by subscriptionId\r\n\t| order by Count desc\r\n\t| extend Rank = row_number()\r\n\t| project value = subscriptionId, label = subscriptionId, selected = Rank == 1",
+            "crossComponentResources": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "b51227d5-990f-41f2-99b7-9627c3859a28",
+            "version": "KqlParameterItem/1.0",
+            "name": "LogAnalytics",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where type =~ 'Microsoft.OperationalInsights/workspaces'",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "49f1041c-e928-40f1-9677-79407c9e70ba",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "value": {
+              "durationMs": 2592000000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ],
+              "allowCustom": true
+            }
+          },
+          {
+            "id": "765a5887-40b2-4ba0-9adb-0c255fd82a50",
+            "version": "KqlParameterItem/1.0",
+            "name": "Method",
+            "type": 2,
+            "description": "Alternate returning Volumes based on Log Analytics Perf Counters or VMInsights",
+            "isRequired": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "jsonData": "[\n    { \"value\":\"InsightMetrics\", \"label\":\"VM Insights\" },\n    { \"value\":\"Perf\", \"label\":\"Performance Counters\", \"selected\":true  }\n]"
+          },
+          {
+            "id": "51119dec-ba10-4d0d-a3a1-6053b15affab",
+            "version": "KqlParameterItem/1.0",
+            "name": "Quantity",
+            "type": 1,
+            "description": "Limit the amount of Volumes returned",
+            "criteriaData": [
+              {
+                "criteriaContext": {
+                  "operator": "Default",
+                  "resultValType": "static",
+                  "resultVal": "50"
+                }
+              }
+            ]
+          }
+        ],
+        "style": "above",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "Parameter block"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "loadType": "always",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "### Virtual Machines - {Quantity} Volumes with Lowest Disk Space in the {TimeRange}\r\n#### Note: Requires Virtual Machines to be connected to Log Analytics and collecting Disk Performance Counters "
+            },
+            "name": "text - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Perf\r\n| where CounterName == \"% Free Space\" and InstanceName != \"_Total\" and InstanceName !contains \"HarddiskVolume\"\r\n| summarize arg_max(TimeGenerated, *) by Computer, InstanceName\r\n| extend FreeSpacePercentage = CounterValue\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, InstanceName, toint(FreeSpacePercentage)\r\n| sort by FreeSpacePercentage asc",
+              "size": 0,
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{LogAnalytics}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "FreeSpace",
+                    "formatter": 3,
+                    "formatOptions": {
+                      "min": 1,
+                      "max": 100,
+                      "palette": "redGreen"
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "CounterValue",
+                    "formatter": 3,
+                    "formatOptions": {
+                      "palette": "greenRed"
+                    }
+                  }
+                ]
+              },
+              "sortBy": [],
+              "tileSettings": {
+                "showBorder": false
+              },
+              "graphSettings": {
+                "type": 0,
+                "topContent": {
+                  "columnMatch": "Computer",
+                  "formatter": 1
+                },
+                "centerContent": {
+                  "columnMatch": "FreeSpace",
+                  "formatter": 1,
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "name": "Low-Disk-Space-Query-LA"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "Method",
+        "comparison": "isEqualTo",
+        "value": "Perf"
+      },
+      "name": "Overview-By-Low-Disk-Space"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "loadType": "always",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "### Virtual Machines - {Quantity} Volumes with Lowest Disk Space in the {TimeRange}\r\n#### Note: Requires Virtual Machines to be connected to Log Analytics and connected via VM Insights"
+            },
+            "name": "text - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": " InsightsMetrics\r\n| where Namespace == \"LogicalDisk\"\r\n| extend Tags = todynamic(Tags)\r\n| extend Drive = tostring(Tags[\"vm.azm.ms/mountId\"])\r\n| extend volumeSizeGB = Tags[\"vm.azm.ms/diskSizeMB\"]/1024.0\r\n| summarize \r\n     FreeSpacePercentage = round(avgif(Val, Name == 'FreeSpacePercentage'))\r\n    ,FreeSpaceGB = round(avgif(Val, Name == 'FreeSpaceMB') /1024)\r\n    ,take_any(round(volumeSizeGB))\r\n    by _ResourceId, Drive\r\n| top {Quantity} by FreeSpacePercentage asc\r\n| project Computer=_ResourceId, Drive, FreeSpacePercentage,FreeSpaceGB,volumeSizeGB\r\n\r\n",
+              "size": 0,
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{LogAnalytics}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "FreeSpacePercentage",
+                    "formatter": 3,
+                    "formatOptions": {
+                      "min": 1,
+                      "max": 100,
+                      "palette": "redGreen"
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "CounterValue",
+                    "formatter": 3,
+                    "formatOptions": {
+                      "palette": "greenRed"
+                    }
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_bar_FreeSpacePercentage_2",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_bar_FreeSpacePercentage_2",
+                  "sortOrder": 1
+                }
+              ],
+              "tileSettings": {
+                "showBorder": false
+              },
+              "graphSettings": {
+                "type": 0,
+                "topContent": {
+                  "columnMatch": "Computer",
+                  "formatter": 1
+                },
+                "centerContent": {
+                  "columnMatch": "FreeSpace",
+                  "formatter": 1,
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "name": "Low-Disk-Space-Query-LA-VMInsights"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "Method",
+        "comparison": "isEqualTo",
+        "value": "InsightMetrics"
+      },
+      "name": "Overview-By-Low-Disk-Space - VMInsights"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "fromTemplateId": "community-Workbooks/Storage/Overview",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
