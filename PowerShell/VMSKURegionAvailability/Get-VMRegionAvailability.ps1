@@ -48,7 +48,7 @@ foreach ($Region in $Regions)
         $exportObj = New-Object PSObject
         if ($RegionData.Name -contains $VMSku.Name)
         {
-            $Zones = $($RegionData | Where-Object {$_.Name -eq 'Standard_A1_v2'}).LocationInfo.Zones
+            $Zones = $($RegionData | Where-Object {$_.Name -eq $VMSKU.Name}).LocationInfo.Zones
             $SortedZones = $Zones -join ","
             if ($Zones -ne $null)
             {
