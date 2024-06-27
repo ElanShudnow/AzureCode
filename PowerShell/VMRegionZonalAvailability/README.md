@@ -7,7 +7,7 @@ This PowerShell Script takes a list of Virtual Machine SKUs from a CSV and Regio
 - PowerShell 7.2.1
 
 ## Files Involved
-- Get-VMRegionAvailability.ps1
+- Get-VMRegionZonalAvailability.ps1
 - VMSKUs.csv
 - output.csv (created after script execution)
 
