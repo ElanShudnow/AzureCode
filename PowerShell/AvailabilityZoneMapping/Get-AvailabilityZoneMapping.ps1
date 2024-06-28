@@ -9,7 +9,7 @@
     PS C:\> .\Get-AvailabilityZoneMapping -Region eastus
 
 .NOTES
-    AUTHOR: ELAN SHUDNOW - SR CLOUD SOLUTION ARCHITECT | Azure Core | Microsoft
+    AUTHOR: ELAN SHUDNOW - PRINCIPAL CLOUD SOLUTION ARCHITECT | Azure Infrastructure | Microsoft
     PERMISSIONS: Minimum Permissions Required are Reader
 
 .LINK
@@ -34,16 +34,10 @@ $SubscriptionIDs = (Get-AzSubscription | Out-GridView -Title 'Azure Subscription
 
 $AvailabilityPeerReport = @()
 foreach ($SubscriptionId in $SubscriptionIDs) {
-  $Body = @{
-    location        = $Region
-    subscriptionIds = @("subscriptions/$SubscriptionId)")
-  }
-  
-  $json = $Body | ConvertTo-Json
 
   $SubscriptionName = (Get-AzSubscription -SubscriptionID $SubscriptionId).Name
 
-  $AvailablityZoneMapping = Invoke-AzRestMethod -Path "/subscriptions/$SubscriptionId/providers/Microsoft.Resources/checkZonePeers/?api-version=2020-01-01" -Method POST -Payload $json
+  $AvailablityZoneMapping = Invoke-AzRestMethod -Path "/subscriptions/$SubscriptionId/locations?api-version=2022-12-01" -Method GET
   $AvailablityZoneMappingContent = $AvailablityZoneMapping.Content
   $AvailablityZoneMappingStatusCode = $AvailablityZoneMapping.StatusCode
 
@@ -52,17 +46,21 @@ foreach ($SubscriptionId in $SubscriptionIDs) {
   {
     Write-Host "`n    - Success: Successful lookup for the $SubscriptionName Subscription." -ForegroundColor Green
 
-    $AvailablityZoneMappingConvertedContent = $AvailablityZoneMappingContent | ConvertFrom-Json
-    $AvailabilityZonePeers = $AvailablityZoneMappingConvertedContent.availabilityZonePeers
+    $AvailablityZoneMappingConvertedContent = ($AvailablityZoneMappingContent | ConvertFrom-Json).value
+    $AvailablityZoneMappingConvertedContentRegionMatch = $AvailablityZoneMappingConvertedContent | Where-Object {$_.Name -eq $Region}
+    $RegionName = $AvailablityZoneMappingConvertedContentRegionMatch.name
+    $RegionalDisplayName = $AvailablityZoneMappingConvertedContentRegionMatch.RegionalDisplayName
+    $availabilityZoneMappings = $AvailablityZoneMappingConvertedContentRegionMatch.availabilityZoneMappings
   
-    foreach ($AvailabilityZonePeer in $AvailabilityZonePeers) 
+    foreach ($AvailablityZoneMapping in $availabilityZoneMappings)
     {
       $AvailabilityPeerObject = New-Object PSObject
       $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionId -Value $SubscriptionId
       $AvailabilityPeerObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
-      $AvailabilityPeerObject | Add-Member -type NoteProperty -name PhysicalZone -Value $AvailabilityZonePeer.availabilityZone
-      $AvailabilityPeerObject | Add-Member -type NoteProperty -name LogicalZone -Value $AvailabilityZonePeer.peers.availabilityZone
-      $AvailabilityPeerObject | Add-Member -type NoteProperty -name Region -Value $Region
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name PhysicalZone -Value $AvailablityZoneMapping.physicalZone[-1]
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name LogicalZone -Value $AvailablityZoneMapping.logicalZone
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name Region -Value $RegionName
+      $AvailabilityPeerObject | Add-Member -type NoteProperty -name RegionDisplayName -Value $RegionalDisplayName
       $AvailabilityPeerReport += $AvailabilityPeerObject
     }
   }
