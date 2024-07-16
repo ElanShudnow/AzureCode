@@ -18,6 +18,7 @@ For additional Azure content, visit my blog: [https://www.shudnow.io](https://ww
 | [AzCostAdvisorMGScope](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzCostAdvisorMGScope) | This script creates a report for Azure Advisor Cost Recommendations at the Management Group Scope in a recursive or non-recursive manner. |
 | [AzVNETOverlap](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzVNETOverlap) | This script creates will output any VNET that overlaps with another VNET within all Azure Subscriptions or specified Azure Subscriptions. |
 | [AzResourceMoveSupport](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzResourceMoveSupport) | This script will take an Azure Usage Report csv file and provide new columns as to whether each resource supports migration to another Resource Group, to another Subscription, or to another Region. |
+| [AzMMARemoval](https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AzMMARemoval) | This script will cycle through Virtual Machines that have the MMA agent installed and if that VM also has the AMA agent installed, MMA will get removed.  The intention of this script is to provide an easy mechanism to decomission MMA once AMA has been rolled out to your fleet of VMs. The script allows you to target an individual Subscription or Subscriptions within a Management Group optionally allowing you to recurse through child Management Groups and their Subscriptions. |
 
 ## Terraform
 
