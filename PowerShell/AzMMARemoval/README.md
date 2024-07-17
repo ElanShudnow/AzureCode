@@ -3,11 +3,11 @@
 This script will cycle through Virtual Machines that have the MMA agent installed and if that VM also has the AMA agent installed, MMA will get removed.  The intention of this script is to provide an easy mechanism to decomission MMA once AMA has been rolled out to your fleet of VMs. The script allows you to target an individual Subscription or Subscriptions within a Management Group optionally allowing you to recurse through child Management Groups and their Subscriptions.
 
 ## PowerShell Versions Tested
-- Windows PowerShell 5.1
 - PowerShell 7.4.3
 
 ## AZ PowerShell Module Version Tested
 - [11.6.0](https://github.com/Azure/azure-powershell/releases)
+- [12.1.0](https://github.com/Azure/azure-powershell/releases)
 
 ## Files Involved
 - AzMMARemoval.ps1
@@ -16,7 +16,6 @@ This script will cycle through Virtual Machines that have the MMA agent installe
 There we will be two separate instructional sections:
 1. Logging Mode
 2. Removal Mode
-
 
 ### Logging Mode
 1. Download AzMMARemoval.ps1
@@ -84,7 +83,7 @@ There we will be two separate instructional sections:
   Here is an example of executing the script against a single subscription with LoggingOnly mode disabled and the resulting PowerShell output.
   ![Alt text](./DemoScreenshots/demo7.jpg?raw=true)
 
-4. Analyze CSV file
+5. Analyze CSV file
 
     Open the CSV file based on the location provided at the end of the PowerShell Output. This will be in the same folder the script was executed in.  The script will provide the same data that was provided in the PowerShell Output in spreadsheet format.  
 
