@@ -41,12 +41,16 @@
     AUTHOR: ELAN SHUDNOW - PRINCIPAL CLOUD SOLUTION ARCHITECT | Azure Infrastructure | Microsoft
     PERMISSIONS: Minimum Permissions Required are Reader and Virtual Machine Contributor.
 
+    Updates:
+    2024-07-16 - Initial Release
+    2024-07-23 - Added additional error handling for MMA Removal.  Included error message as to why MMA Removal was unsuccessful in both PowerShell Output and CSV Output.
+
 .LINK
     https://github.com/ElanShudnow/AzurePS/tree/main/PowerShell/AzMMARemoval
     Please note that while being developed by a Microsoft employee, AzMMARemoval is not a Microsoft service or product. AzMMARemoval is a personal/community driven project, there are none implicit or explicit obligations related to this project, it is provided 'as is' with no warranties and confer no rights.
 #>
 
- [CmdletBinding()]
+[CmdletBinding()]
 Param
 (
     [parameter(mandatory=$true, ParameterSetName = 'ManagementGroup')]
@@ -193,7 +197,7 @@ ForEach ($Subscription in $AzSubscriptions)
     }
     catch
     {
-        Write-Host "Error: Unsucessful connection attempt to Azure Subscription: $SubscriptionHeader.  Moving to next Subscription" -ForegroundColor Red
+        Write-Host "Error: Unsuccessful connection attempt to Azure Subscription: $SubscriptionHeader.  Moving to next Subscription" -ForegroundColor Red
         continue
     }
     Write-Host "`n    - Checking for existence of AMA on VMs with MMA installed" 
@@ -253,22 +257,38 @@ ForEach ($Subscription in $AzSubscriptions)
                     $MMARemoval = Remove-AzVMExtension -ResourceGroupName $VMRG -VMName $VMName -Name MicrosoftMonitoringAgent -Force -ErrorAction Stop
                     $MMARemoval = "Successful"
                     Write-Host "            - Successful MMA Removal from VM: $VMName" -ForegroundColor Green
+
+                    $MMARemovalPSObject = New-Object PSObject
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name VMName -Value $VMName
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name ResourceGroupName -Value $VMRG
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionID -Value $SubscriptionID
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMAInstalled -Value $true
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name AMAInstalled -Value $true
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMARemoval -Value $MMARemoval
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMARemovalErrorMsg -Value ''
+                    $CustomMMARemovalReport += $MMARemovalPSObject
                 }
                 catch
                 {
-                    $MMARemoval = "Unsuccessful"
-                    Write-Host "            - ERROR: Unsuccessful MMA Removal from VM $VMName" -ForegroundColor Red
-                }
+                    $ErrorMessage = $_.Exception.Message
+                    $ErrorIndex = $ErrorMessage.IndexOf('ErrorCode')
+                    $ErrorResult = $ErrorMessage.Substring(0, $ErrorIndex).Trim()
+                    $MMARemoval = "Unsuccessful."
+                    Write-Host "            - ERROR: Unsuccessful MMA Removal from VM $VMName.  Error Msg: $ErrorResult" -ForegroundColor Red
 
-                $MMARemovalPSObject = New-Object PSObject
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name VMName -Value $VMName
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name ResourceGroupName -Value $VMRG
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionID -Value $SubscriptionID
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name MMAInstalled -Value $true
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name AMAInstalled -Value $true
-                $MMARemovalPSObject | Add-Member -type NoteProperty -name MMARemoval -Value $MMARemoval
-                $CustomMMARemovalReport += $MMARemovalPSObject
+                    $MMARemovalPSObject = New-Object PSObject
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name VMName -Value $VMName
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name ResourceGroupName -Value $VMRG
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionID -Value $SubscriptionID
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name SubscriptionName -Value $SubscriptionName
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMAInstalled -Value $true
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name AMAInstalled -Value $true
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMARemoval -Value $MMARemoval
+                    $MMARemovalPSObject | Add-Member -type NoteProperty -name MMARemovalErrorMessage -Value $ErrorResult
+
+                    $CustomMMARemovalReport += $MMARemovalPSObject
+                }
             }
             else
             {
