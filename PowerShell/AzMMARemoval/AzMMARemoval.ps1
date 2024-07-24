@@ -274,7 +274,7 @@ ForEach ($Subscription in $AzSubscriptions)
                     $ErrorMessage = $_.Exception.Message
                     $ErrorIndex = $ErrorMessage.IndexOf('ErrorCode')
                     $ErrorResult = $ErrorMessage.Substring(0, $ErrorIndex).Trim()
-                    $MMARemoval = "Unsuccessful."
+                    $MMARemoval = "Unsuccessful"
                     Write-Host "            - ERROR: Unsuccessful MMA Removal from VM $VMName.  Error Msg: $ErrorResult" -ForegroundColor Red
 
                     $MMARemovalPSObject = New-Object PSObject
