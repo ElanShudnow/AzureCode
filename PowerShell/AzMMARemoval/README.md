@@ -2,6 +2,9 @@
 ## Description
 This script will cycle through Virtual Machines that have the MMA agent installed and if that VM also has the AMA agent installed, MMA will get removed.  The intention of this script is to provide an easy mechanism to decomission MMA once AMA has been rolled out to your fleet of VMs. The script allows you to target an individual Subscription or Subscriptions within a Management Group optionally allowing you to recurse through child Management Groups and their Subscriptions.
 
+> **_NOTE:_**  Since the release of this script, there has been an official Microsoft Published MMA Removal PowerShell Script created.  It is recommended to prioritize using the official script before using this one.  You can see this script in the [MMA/OMS Discovery and Removal Utility
+](https://learn.microsoft.com/en-us/azure/azure-monitor/agents/azure-monitor-agent-mma-removal-tool?tabs=single-tenant%2Cdiscovery) article.
+
 ## PowerShell Versions Tested
 - PowerShell 7.4.3
 
