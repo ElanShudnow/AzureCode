@@ -1,4 +1,4 @@
-2# Get-AvailabilityZoneMapping
+# Get-AvailabilityZoneMapping
 ## Description
 This PowerShell Script takes a list of Azure Subscriptions you have selected in Grid View and cycles through each subscription and obtains information about the Logical to Physical Zone Mapping.  Information is collected and outputted to an output.csv in the same folder the script was executed in.
 
