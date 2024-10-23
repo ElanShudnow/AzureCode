@@ -1,4 +1,4 @@
-# Get-AvailabilityZoneMapping
+2# Get-AvailabilityZoneMapping
 ## Description
 This PowerShell Script takes a list of Azure Subscriptions you have selected in Grid View and cycles through each subscription and obtains information about the Logical to Physical Zone Mapping.  Information is collected and outputted to an output.csv in the same folder the script was executed in.
 
@@ -32,3 +32,15 @@ This PowerShell Script takes a list of Azure Subscriptions you have selected in 
 6. In the output CSV that is generated, you will see details around the Subscriptions and Physical to Logical Availability Zone Mapping. 
    
    ![Alt text](./DemoScreenshots/demo5.jpg?raw=true)
+
+## 10/23/2024 Script Update - Checking for Valid Regions and Zonal Existance.
+In the script update pushed on 10/23/2024, I have added two new capabilities to the script:
+- Checking for the existance of the Region specified.  If the Region does not exist as typed, the script will terminate with information on how to capture the correct Region Name
+- If the Region exists as typed, the script will check if the Region contains Availability Zones.  If not, the script will terminate with the reason being the Region does not contain Availability Zones and provide documentation link to what Regions support Availability Zones.
+
+### Region Does Not Exist:
+![Alt text](./DemoScreenshots/demo6.jpg?raw=true)
+
+### Availability Zone Does Not Exist for Region:
+![Alt text](./DemoScreenshots/demo7.jpg?raw=true)
+

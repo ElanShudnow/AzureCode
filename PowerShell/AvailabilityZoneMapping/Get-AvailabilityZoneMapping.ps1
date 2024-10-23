@@ -15,7 +15,8 @@
 .LINK
     https://github.com/ElanShudnow/AzureCode/tree/main/PowerShell/AvailabilityZoneMapping
     Please note that while being developed by a Microsoft employee, Get-AvailabilityZoneMapping.ps1 is not a Microsoft service or product. Get-AvailabilityZoneMapping.ps1 is a personal/community driven project, there are none implicit or explicit obligations related to this project, it is provided 'as is' with no warranties and confer no rights.
-#>
+
+    #>
 
 [CmdletBinding()]
 Param
@@ -39,7 +40,25 @@ foreach ($SubscriptionId in $SubscriptionIDs) {
 
   $AvailablityZoneMapping = Invoke-AzRestMethod -Path "/subscriptions/$SubscriptionId/locations?api-version=2022-12-01" -Method GET
   $AvailablityZoneMappingContent = $AvailablityZoneMapping.Content
+  $AvailabilityZoneMappingContentObject = ($AvailablityZoneMappingContent | ConvertFrom-Json).Value
+  $AvailabilityZoneMappingContentObjectRegionCheckRegion = ($AvailabilityZoneMappingContentObject | Where-Object {$_.Name -eq $Region})
+  $AvailabilityZoneMappingContentObjectRegionCheckRegionZones = $AvailabilityZoneMappingContentObjectRegionCheckRegion.availabilityZoneMappings
   $AvailablityZoneMappingStatusCode = $AvailablityZoneMapping.StatusCode
+
+  if (-not($AvailabilityZoneMappingContentObjectRegionCheckRegion))
+  {
+    Write-Host "The Region Specified, $Region, does not exist.  Please specify a Region that exists.  Use the following command to find a list of all Available Regions:" -ForegroundColor Red
+    Write-Host "`nGet-AzLocation | FL Name" -ForegroundColor Red
+    Write-Host "`nTerminating Script..." -ForegroundColor Red
+    exit
+  }
+  if (-not($AvailabilityZoneMappingContentObjectRegionCheckRegionZones))
+  {
+    Write-Host "The Region Specified, $Region, does not support Availability Zones.  Please specify a Region that supports AvailabilityZones." -ForegroundColor Red
+    Write-Host "`nPlease see the following link for what Regions support Availability Zones: https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support#azure-regions-with-availability-zone-support" -ForegroundColor Red
+    Write-Host "`nTerminating Script..." -ForegroundColor Red
+    exit
+  }
 
   Write-Host "`nObtaining Availability Zone Logical to Physical Zone Mapping for $SubscriptionName in the $Region Region." -ForegroundColor Yellow
   if ($AvailablityZoneMappingStatusCode -eq 200) 
@@ -64,13 +83,10 @@ foreach ($SubscriptionId in $SubscriptionIDs) {
       $AvailabilityPeerReport += $AvailabilityPeerObject
     }
   }
-  elseif (($AvailablityZoneMappingStatusCode -eq 404) -and ($AvailablityZoneMappingContent -like "*The resource type could not be found in the namespace 'Microsoft.Resources'*")) 
-  {
-    Write-Host "`n    - ERROR: checkZonePeers is not registered for this subscription. See README." -ForegroundColor Red
-  }
   else
   {
-    Write-Host "`n    - ERROR: Unknown Error: $AvailablityZoneMappingContent." -ForegroundColor Red
+    Write-Host "`n    - ERROR: Unknown Error: $AvailablityZoneMappingContent.Error" -ForegroundColor Red
+    $ErrorOccured = "yes"
   }
 }
 
@@ -79,9 +95,12 @@ if ($AvailabilityPeerReport -ne $null)
   $AvailabilityPeerReport | Export-Csv -Path $ExportFile -NoTypeInformation
   Write-Host "`nOutput CSV generated at the following location: $ExportFile" -ForegroundColor Yellow
 }
-else 
+elseif ($ErrorOccured -eq "yes")
 {
   Write-Host "`nNo Output CSV generated as no Subscriptions had a successful lookup." -ForegroundColor Yellow
+}
+else {
+  Write-Host "`nNo Output CSV generated as the specified Region does not support Availability Zones." -ForegroundColor Yellow
 }
 
 
