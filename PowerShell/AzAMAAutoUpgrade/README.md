@@ -80,7 +80,7 @@ There we will be two separate instructional sections:
 ![Alt text](./DemoScreenshots/demo6.png?raw=true)
 
   Here is an example of executing the script against a single subscription with LoggingOnly mode disabled and the resulting PowerShell output.
-  ![Alt text](./DemoScreenshots/demo7.jpg?raw=true)
+  ![Alt text](./DemoScreenshots/demo7.png?raw=true)
 
 5. Analyze CSV file
 
