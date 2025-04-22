@@ -65,7 +65,7 @@ There we will be two separate instructional sections:
     ```
 3. As this is a configuration change, the script, after run will inform you what Script Mode the script is executing (with red text informing you logging only mode is disabled and the script will configure the AMA agent for auto-upgrade on VMs/ and require confirmation input that will only accept the responses Yes or No (default is No).
 
-    ![Alt text](./DemoScreenshots/demo5.?raw=true)
+    ![Alt text](./DemoScreenshots/demo5.png?raw=true)
 
 4. Analyze the PowerShell Output.  The following data will be displayed:
     * Script Mode
